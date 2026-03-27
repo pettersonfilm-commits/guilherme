@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design System - Guilherme Videomaker</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        syncopate: ['Syncopate', 'sans-serif'],
+                        playfair: ['Playfair Display', 'serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', 'monospace'],
+                    },
+                    colors: {
+                        primary: '#000000',
+                        secondary: '#555555',
+                        accent1: '#00FFFF', // Cyan
+                        accent2: '#8A2BE2', // Purple
+                        surface: '#F8F8F8',
+                        surfaceElevated: '#FFFFFF',
+                        border: '#E0E0E0',
+                        feedbackSuccess: '#10B981',
+                        feedbackError: '#EF4444',
+                        background: '#FFFFFF',
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        'gradient-brand': 'linear-gradient(135deg, #00FFFF, #8A2BE2)',
+                    },
+                    animation: {
+                        'blob': 'blob 10s infinite',
+                        'blob-reverse': 'blob-reverse 12s infinite',
+                        'gradient-x': 'gradient-x 3s ease infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                        },
+                        'blob-reverse': {
+                            '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(-30px, 50px) scale(1.2)' },
+                            '66%': { transform: 'translate(20px, -20px) scale(0.8)' },
+                        },
+                        'gradient-x': {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Base Styles and Custom Utilities */
+        body {
+            background-color: #FFFFFF;
+            color: #000000;
+            overflow-x: hidden;
+            font-family: 'Playfair Display', serif; /* Default to serif for elegance, headings use syncopate */
+        }
+
+        .font-main { font-family: 'Syncopate', sans-serif; }
+        .font-secondary { font-family: 'Playfair Display', serif; }
+
+        /* Typography Reset & Defaults */
+        h1, h2, h3, h4, h5, h6 { font-family: 'Syncopate', sans-serif; text-transform: uppercase; font-weight: 700; line-height: 1.1; letter-spacing: -0.05em; }
+        
+        /* Smooth Scroll */
+        html { scroll-behavior: smooth; }
+
+        /* Animated Background Mesh */
+        .bg-mesh {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: #FFFFFF;
+            opacity: 0.2; /* Subtly elegant */
+            pointer-events: none;
+        }
+        .mesh-blob {
+            position: absolute;
+            filter: blur(80px);
+            border-radius: 50%;
+            opacity: 0.4;
+        }
+        .mesh-cyan { background: #00FFFF; width: 40vw; height: 40vw; top: -10vw; left: -10vw; animation: blob 15s infinite alternate ease-in-out; }
+        .mesh-purple { background: #8A2BE2; width: 35vw; height: 35vw; bottom: -10vw; right: -5vw; animation: blob-reverse 18s infinite alternate ease-in-out; }
+
+        /* General Reveal Class for ScrollTrigger */
+        .reveal-up { opacity: 0; transform: translateY(40px); }
+
+        /* Text Gradient Utility */
+        .text-gradient {
+            background: linear-gradient(135deg, #00FFFF, #8A2BE2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        /* Interactive Buttons */
+        .btn-interactive {
+            position: relative;
+            overflow: hidden;
+            transition: color 0.4s ease;
+            z-index: 1;
+        }
+        .btn-interactive::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #00FFFF, #8A2BE2);
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .btn-interactive:hover { color: #FFFFFF; border-color: transparent; }
+        .btn-interactive:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(248, 248, 248, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(224, 224, 224, 0.5);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
+
+        /* Input Styles */
+        .input-animated {
+            border: 1px solid #E0E0E0;
+            background: transparent;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .input-animated:focus {
+            outline: none;
+            border-color: #8A2BE2;
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.1);
+        }
+
+        /* Tooltip */
+        .tooltip-container { position: relative; display: inline-block; }
+        .tooltip-text {
+            visibility: hidden;
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-family: 'Syncopate', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Modal Base */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            z-index: 50; display: none; justify-content: center; align-items: center;
+            opacity: 0;
+        }
+        .modal-content {
+            background: #fff; padding: 40px; border-radius: 8px;
+            border: 1px solid #e0e0e0; max-width: 500px; width: 90%;
+            transform: translateY(20px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+
+    </style>
+</head>
+<body class="antialiased text-primary selection:bg-accent1 selection:text-white">
+
+    <!-- Animated Faint Background -->
+    <div class="bg-mesh">
+        <div class="mesh-blob mesh-cyan"></div>
+        <div class="mesh-blob mesh-purple"></div>
+    </div>
+
+    <!-- 1. HERO / SHOWCASE CAPABILITIES -->
+    <section class="relative min-h-screen flex flex-col justify-center items-center px-4 overflow-hidden pt-20">
+        <!-- Abstract Rotating 3D representation (2.5D CSS) -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20" id="hero-symbol">
+             <div class="w-96 h-96 rounded-full bg-gradient-brand animate-blob blur-3xl"></div>
+        </div>
+
+        <div class="z-10 text-center">
+            <h2 class="font-secondary text-secondary text-sm md:text-xl italic mb-6 tracking-widest uppercase" id="hero-tagline">Design System Cinematic</h2>
+            <h1 class="font-main text-5xl md:text-8xl lg:text-[10rem] tracking-tighter text-primary flex justify-center gap-1 md:gap-4 overflow-hidden" id="hero-title">
+                <span class="hero-char">G</span><span class="hero-char">U</span><span class="hero-char">I</span><span class="hero-char">L</span><span class="hero-char">H</span><span class="hero-char">E</span><span class="hero-char">R</span><span class="hero-char">M</span><span class="hero-char">E</span>
+            </h1>
+            <p class="mt-8 text-xl md:text-2xl font-secondary text-secondary max-w-2xl mx-auto italic hero-desc">
+                "O minimalismo do branco puro encontra o movimento. <br>Um manifesto de <span class="text-gradient font-bold uppercase not-italic text-sm tracking-widest font-main">Performance & Arte</span>."
+            </p>
+            <div class="mt-12 flex gap-4 justify-center hero-desc">
+                <button class="font-main uppercase text-sm tracking-[0.2em] px-8 py-4 border border-border bg-white glass-card hover:border-black transition-colors rounded-full flex items-center gap-2" onclick="document.getElementById('typo').scrollIntoView()">
+                    Explorar System <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 animate-bounce">
+            <i data-lucide="mouse" class="w-6 h-6 text-border"></i>
+        </div>
+    </section>
+
+    <!-- Global Container for Sections -->
+    <div class="max-w-7xl mx-auto px-6 md:px-12 py-24 space-y-40">
+
+        <!-- 2. TIPOGRAFIA -->
+        <section id="typo" class="reveal-up">
+            <div class="mb-12 border-b border-border pb-6">
+                <h2 class="text-sm tracking-[0.3em] text-secondary mb-2">01. Tipografia</h2>
+                <h3 class="text-4xl text-primary max-w-2xl">A dualidade entre a precisão geométrica e a narrativa elegante.</h3>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-16">
+                <!-- Primary Font -->
+                <div class="space-y-6">
+                    <div class="flex justify-between items-end border-b border-border pb-2">
+                        <span class="font-main text-2xl">SYNCOPATE</span>
+                        <span class="text-xs text-secondary font-mono">Primary / Titles</span>
+                    </div>
+                    <ul class="text-sm font-mono text-secondary space-y-2">
+                        <li><strong class="text-primary">Roles:</strong> Headers (H1-H6), Buttons, Badges</li>
+                        <li><strong class="text-primary">Weights:</strong> Bold (700), Regular (400)</li>
+                        <li><strong class="text-primary">Loading:</strong> Google Fonts CDN (Preconnected)</li>
+                        <li><strong class="text-primary">Transform:</strong> Uppercase Only</li>
+                        <li><strong class="text-primary">Fallback:</strong> sans-serif</li>
+                    </ul>
+                    <div class="bg-surface p-8 rounded-lg overflow-hidden border border-border">
+                        <h1 class="text-5xl mb-4 truncate text-primary tracking-tighter">Aa Bb Cc</h1>
+                        <p class="font-main text-xs uppercase tracking-widest text-secondary mt-4">The Quick Brown Fox</p>
+                    </div>
+                </div>
+
+                <!-- Secondary Font -->
+                <div class="space-y-6">
+                    <div class="flex justify-between items-end border-b border-border pb-2">
+                        <span class="font-secondary text-2xl italic">Playfair Display</span>
+                        <span class="text-xs text-secondary font-mono">Secondary / Body</span>
+                    </div>
+                    <ul class="text-sm font-mono text-secondary space-y-2">
+                        <li><strong class="text-primary">Roles:</strong> Body text, Taglines, Quotes</li>
+                        <li><strong class="text-primary">Weights:</strong> Regular (400), Bold (700), Italics</li>
+                        <li><strong class="text-primary">Loading:</strong> Google Fonts CDN (Preconnected)</li>
+                        <li><strong class="text-primary">Transform:</strong> Normal</li>
+                        <li><strong class="text-primary">Fallback:</strong> serif</li>
+                    </ul>
+                    <div class="bg-surface p-8 rounded-lg border border-border">
+                        <div class="text-5xl mb-4 font-secondary italic text-primary">Aa Bb Cc</div>
+                        <p class="font-secondary text-sm text-secondary italic mt-4">The Quick Brown Fox Jumps Over The Lazy Dog. Elegance in every curve.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Type Scale -->
+            <div class="mt-16">
+                <h4 class="font-main text-xs tracking-widest text-secondary mb-8 uppercase">Type Scale Specification</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-border text-xs font-mono text-secondary">
+                                <th class="pb-4 font-normal">Role</th>
+                                <th class="pb-4 font-normal">Font Family</th>
+                                <th class="pb-4 font-normal">Weight</th>
+                                <th class="pb-4 font-normal">Size (Desktop)</th>
+                                <th class="pb-4 font-normal">Line Height</th>
+                                <th class="pb-4 font-normal">Letter Spacing</th>
+                                <th class="pb-4 font-normal pr-4 text-right">Preview</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-mono text-sm">
+                            <tr class="border-b border-border/50">
+                                <td class="py-6">H1</td>
+                                <td>Syncopate</td>
+                                <td>700</td>
+                                <td>80px (5rem)</td>
+                                <td>1.1</td>
+                                <td>-0.05em</td>
+                                <td class="text-right"><span class="font-main text-4xl tracking-tighter uppercase text-primary">Heading</span></td>
+                            </tr>
+                            <tr class="border-b border-border/50">
+                                <td class="py-6">H2</td>
+                                <td>Syncopate</td>
+                                <td>700</td>
+                                <td>64px (4rem)</td>
+                                <td>1.1</td>
+                                <td>-0.02em</td>
+                                <td class="text-right"><span class="font-main text-2xl tracking-tight uppercase text-primary">Heading</span></td>
+                            </tr>
+                            <tr class="border-b border-border/50">
+                                <td class="py-6">H3</td>
+                                <td>Syncopate</td>
+                                <td>700</td>
+                                <td>48px (3rem)</td>
+                                <td>1.2</td>
+                                <td>0</td>
+                                <td class="text-right"><span class="font-main text-xl uppercase text-primary">Heading</span></td>
+                            </tr>
+                            <tr class="border-b border-border/50">
+                                <td class="py-6">H4-H6</td>
+                                <td>Syncopate</td>
+                                <td>400/700</td>
+                                <td>24px-32px</td>
+                                <td>1.3</td>
+                                <td>0.05em</td>
+                                <td class="text-right"><span class="font-main text-lg uppercase tracking-wide text-primary">Heading</span></td>
+                            </tr>
+                            <tr class="border-b border-border/50">
+                                <td class="py-6">Body Lg (Tagline)</td>
+                                <td>Playfair</td>
+                                <td>400 Italic</td>
+                                <td>24px (1.5rem)</td>
+                                <td>1.6</td>
+                                <td>0</td>
+                                <td class="text-right"><span class="font-secondary italic text-lg text-secondary">Amet consectetur</span></td>
+                            </tr>
+                            <tr class="border-b border-border/50">
+                                <td class="py-6">Body Normal</td>
+                                <td>Playfair</td>
+                                <td>400</td>
+                                <td>18px (1.125rem)</td>
+                                <td>1.7</td>
+                                <td>0</td>
+                                <td class="text-right"><span class="font-secondary text-base text-secondary">Lorem ipsum dolor</span></td>
+                            </tr>
+                            <tr>
+                                <td class="py-6">Labels / Badges</td>
+                                <td>Syncopate</td>
+                                <td>400</td>
+                                <td>12px (0.75rem)</td>
+                                <td>1.4</td>
+                                <td>0.1em</td>
+                                <td class="text-right"><span class="font-main uppercase tracking-widest text-xs text-secondary">LABEL TEXT</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 3. CORES -->
+        <section id="colors" class="reveal-up">
+            <div class="mb-12 border-b border-border pb-6">
+                <h2 class="text-sm tracking-[0.3em] text-secondary mb-2 font-main uppercase">02. Sistema de Cores</h2>
+                <h3 class="text-4xl text-primary max-w-2xl font-main">Luz pura (Branco) cortada por um contraste absoluto e cores vibrantes.</h3>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <!-- Primary / Background -->
+                <div class="col-span-2 md:col-span-1 rounded-2xl overflow-hidden border border-border group hover:shadow-xl transition-shadow bg-white text-black">
+                    <div class="h-32 bg-white flex items-end p-4 border-b border-border">
+                        <span class="font-mono text-xs opacity-50">Background / Surface</span>
+                    </div>
+                    <div class="p-4 space-y-2 bg-surface">
+                        <div class="font-main text-xs uppercase font-bold tracking-widest">Pure White</div>
+                        <div class="font-mono text-xs text-secondary flex justify-between"><span>HEX</span><span>#FFFFFF</span></div>
+                        <div class="font-mono text-xs text-secondary flex justify-between"><span>RGB</span><span>255,255,255</span></div>
+                        <div class="font-mono text-xs text-secondary mt-2 border-t border-border pt-2 text-right">AAA Contrast (Black Text)</div>
+                    </div>
+                </div>
+
+                <!-- Text Primary -->
+                <div class="col-span-2 md:col-span-1 rounded-2xl overflow-hidden border border-border group hover:shadow-xl transition-shadow bg-black text-white">
+                    <div class="h-32 bg-black flex items-end p-4 border-b border-white/20">
+                        <span class="font-mono text-xs opacity-50">Text Primary</span>
+                    </div>
+                    <div class="p-4 space-y-2 bg-[#111]">
+                        <div class="font-main text-xs uppercase font-bold tracking-widest">Pure Black</div>
+                        <div class="font-mono text-xs text-gray-400 flex justify-between"><span>HEX</span><span>#000000</span></div>
+                        <div class="font-mono text-xs text-gray-400 flex justify-between"><span>RGB</span><span>0,0,0</span></div>
+                        <div class="font-mono text-xs text-gray-400 mt-2 border-t border-white/20 pt-2 text-right">Primary Info</div>
+                    </div>
+                </div>
+
+                <!-- Text Secondary -->
+                <div class="col-span-2 md:col-span-1 rounded-2xl overflow-hidden border border-border group hover:shadow-xl transition-shadow bg-[#555555] text-white">
+                    <div class="h-32 bg-[#555555] flex items-end p-4 border-b border-white/20">
+                        <span class="font-mono text-xs opacity-50">Text Secondary / Border</span>
+                    </div>
+                    <div class="p-4 space-y-2 bg-[#444]">
+                        <div class="font-main text-xs uppercase font-bold tracking-widest">Dark Gray</div>
+                        <div class="font-mono text-xs text-gray-300 flex justify-between"><span>HEX</span><span>#555555</span></div>
+                        <div class="font-mono text-xs text-gray-300 flex justify-between"><span>RGB</span><span>85,85,85</span></div>
+                        <div class="font-mono text-xs text-gray-300 mt-2 border-t border-white/20 pt-2 text-right">AA Contrast</div>
+                    </div>
+                </div>
+
+                <!-- Accent Gradient -->
+                <div class="col-span-2 md:col-span-1 rounded-2xl overflow-hidden border border-border group hover:shadow-xl transition-shadow relative">
+                    <div class="absolute inset-0 bg-gradient-brand opacity-20 filter blur-xl group-hover:opacity-100 transition-opacity z-0"></div>
+                    <div class="h-32 bg-gradient-brand flex items-end p-4 relative z-10 text-white">
+                        <span class="font-mono text-xs opacity-80" style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Accent / Interactive / Símbolo 3D</span>
+                    </div>
+                    <div class="p-4 space-y-2 bg-white relative z-10 border-t border-border">
+                        <div class="font-main text-xs uppercase font-bold tracking-widest text-gradient">Cyan to Purple</div>
+                        <div class="font-mono text-xs text-secondary flex justify-between"><span>135deg</span><span>#00FFFF &rarr; #8A2BE2</span></div>
+                        <div class="font-mono text-xs text-secondary mt-2 border-t border-border pt-2 text-right">Hover Effects & Icons</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex gap-4 text-xs font-mono text-secondary items-center p-4 bg-surface border border-border rounded-lg">
+                <i data-lucide="info" class="w-4 h-4 text-accent2"></i>
+                <p><strong>Contextual Usage Rules:</strong> Fundos e cards utilizam `#FFFFFF` ou `#F8F8F8`. Bordas em `#E0E0E0`. O gradiente é estritamente reservado para *calls to action* em hover, ícones destaque ou o símbolo 3D, garantindo que quando aparece, capture 100% da atenção do usuário.</p>
+            </div>
+        </section>
+
+
+        <!-- 4. UI COMPONENTS -->
+        <section id="components" class="reveal-up">
+            <div class="mb-12 border-b border-border pb-6">
+                <h2 class="text-sm tracking-[0.3em] text-secondary mb-2 font-main">03. Componentes da Interface (UI)</h2>
+                <h3 class="text-4xl text-primary max-w-2xl font-main">Animações contidas, bordas exatas e uso de glassmorphism em fundo branco.</h3>
+            </div>
+
+            <div class="space-y-20">
+                <!-- Navbar Concept -->
+                <div>
+                    <h4 class="font-main text-xs tracking-widest text-secondary mb-6 uppercase">Navbar (Glassmorphism Pinned)</h4>
+                    <div class="w-full bg-white/70 backdrop-blur-md border border-border rounded-full p-4 flex justify-between items-center px-8 shadow-sm">
+                        <div class="font-main text-xl tracking-tighter uppercase font-bold">Guilherme</div>
+                        <div class="hidden md:flex gap-8 font-main text-xs tracking-widest uppercase text-secondary">
+                            <a href="#" class="hover:text-primary transition-colors">Portfólio</a>
+                            <a href="#" class="hover:text-primary transition-colors">Sobre</a>
+                            <a href="#" class="hover:text-primary transition-colors">Contato</a>
+                        </div>
+                        <button class="font-main btn-interactive border border-border px-6 py-2 rounded-full uppercase text-xs tracking-widest">Falar Comigo</button>
+                    </div>
+                </div>
+
+                <!-- Buttons & Badges & Tooltips -->
+                <div class="grid md:grid-cols-2 gap-12">
+                    <div>
+                        <h4 class="font-main text-xs tracking-widest text-secondary mb-6 uppercase">Interactive Buttons</h4>
+                        <div class="flex flex-col gap-6 items-start">
+                            <button class="font-main btn-interactive border border-primary text-primary px-8 py-3 rounded-full uppercase text-xs tracking-[0.2em]">
+                                Primary CTA (Hover Me)
+                            </button>
+                            
+                            <button class="font-main group flex items-center gap-2 border-b border-primary pb-1 uppercase text-xs tracking-widest hover:border-transparent transition-colors">
+                                <span class="group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-brand transition-all">Link Button Arrow</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform group-hover:text-accent2"></i>
+                            </button>
+
+                            <button class="w-12 h-12 rounded-full border border-border flex items-center justify-center hover:bg-gradient-brand hover:text-white hover:border-transparent transition-all hover:shadow-[0_0_20px_rgba(138,43,226,0.3)]">
+                                <i data-lucide="play" class="w-4 h-4 ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-main text-xs tracking-widest text-secondary mb-6 uppercase">Badges & Tooltips</h4>
+                        <div class="flex flex-wrap gap-4 items-center">
+                            <!-- Badges -->
+                            <div class="px-4 py-1.5 rounded-full border border-border font-main text-[10px] tracking-widest text-secondary uppercase hover:bg-surface transition-colors cursor-default">
+                                Premiere Pro
+                            </div>
+                            <div class="px-4 py-1.5 rounded-full border border-green-500/30 bg-green-50 text-green-700 font-main text-[10px] tracking-widest uppercase hover:bg-green-100 transition-colors cursor-default">
+                                Disponível
+                            </div>
+
+                            <!-- Tooltip -->
+                            <div class="tooltip-container mt-6 w-full">
+                                <span class="font-secondary italic border-b border-dashed border-secondary text-secondary cursor-help pb-1">Passe o mouse aqui para ver o Tooltip</span>
+                                <span class="tooltip-text">Incrível Tooltip <i data-lucide="sparkles" class="w-3 h-3 inline"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inputs & Modals -->
+                <div class="grid md:grid-cols-2 gap-12">
+                     <div>
+                        <h4 class="font-main text-xs tracking-widest text-secondary mb-6 uppercase">Forms / Inputs</h4>
+                        <form class="space-y-6 max-w-sm" onsubmit="event.preventDefault()">
+                            <div class="relative">
+                                <input type="text" id="name" class="input-animated w-full px-4 py-3 pb-2 pt-5 rounded-md peer font-secondary text-primary" placeholder=" ">
+                                <label for="name" class="absolute left-4 top-1 text-[10px] font-main uppercase tracking-widest text-secondary transition-all peer-placeholder-shown:text-xs peer-placeholder-shown:top-3.5 peer-placeholder-shown:font-secondary peer-placeholder-shown:normal-case peer-focus:top-1 peer-focus:text-[10px] peer-focus:font-main peer-focus:uppercase">Seu Nome</label>
+                            </div>
+                            <div class="relative">
+                                <input type="email" id="email" class="input-animated w-full px-4 py-3 pb-2 pt-5 rounded-md peer font-secondary text-primary" placeholder=" ">
+                                <label for="email" class="absolute left-4 top-1 text-[10px] font-main uppercase tracking-widest text-secondary transition-all peer-placeholder-shown:text-xs peer-placeholder-shown:top-3.5 peer-placeholder-shown:font-secondary peer-placeholder-shown:normal-case peer-focus:top-1 peer-focus:text-[10px] peer-focus:font-main peer-focus:uppercase">Seu Email</label>
+                            </div>
+                            <button class="font-main w-full btn-interactive border border-primary text-primary px-8 py-3 rounded-md uppercase text-xs tracking-widest text-center">
+                                Enviar Mensagem
+                            </button>
+                        </form>
+                    </div>
+
+                    <div>
+                        <h4 class="font-main text-xs tracking-widest text-secondary mb-6 uppercase">Modals & Overlays</h4>
+                        <button onclick="document.getElementById('demo-modal').style.display='flex'; gsap.to('#demo-modal', {opacity:1, duration:0.3}); gsap.fromTo('#demo-modal .modal-content', {y: 20, opacity:0}, {y:0, opacity:1, duration:0.4, ease:'power3.out', delay:0.1});" class="font-main border border-border px-6 py-3 uppercase text-xs tracking-widest hover:bg-surface transition-colors rounded">
+                            Disparar Modal de Vídeo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Media Cards / Sections -->
+                <div>
+                     <h4 class="font-main text-xs tracking-widest text-secondary mb-6 uppercase">Media Cards (Parallax Hover)</h4>
+                     <div class="grid md:grid-cols-2 gap-8">
+                         <!-- Card 1 -->
+                         <div class="group relative overflow-hidden rounded-xl aspect-video cursor-pointer border border-border bg-surface">
+                             <div class="w-full h-full bg-[url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800')] bg-cover bg-center transform group-hover:scale-105 transition-transform duration-700"></div>
+                             <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500"></div>
+                             
+                             <div class="absolute inset-0 flex flex-col justify-end p-6 md:p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                 <div class="font-main text-xs uppercase tracking-[0.2em] text-white/70 mb-2">Comercial</div>
+                                 <h5 class="font-main text-2xl text-white uppercase tracking-tight">Luxury Core</h5>
+                             </div>
+                             
+                             <!-- Play Button Indicator -->
+                             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                                 <i data-lucide="play" class="w-6 h-6 text-white ml-1"></i>
+                             </div>
+                         </div>
+
+                         <!-- Card Testimonial -->
+                         <div class="glass-card rounded-xl p-10 flex flex-col justify-between">
+                            <i data-lucide="quote" class="w-8 h-8 text-border mb-6"></i>
+                            <p class="font-secondary italic text-xl md:text-2xl text-primary leading-relaxed">"A pureza do branco aliada à suavidade de uma transição 3D e uma tipografia agressiva resultam na experiência premium perfeita."</p>
+                            <div class="mt-8 flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-surface border border-border"></div>
+                                <div>
+                                    <div class="font-main text-xs uppercase tracking-widest text-primary">Diretor de Arte</div>
+                                    <div class="font-secondary text-sm text-secondary italic text-gradient">Studio Alpha</div>
+                                </div>
+                            </div>
+                         </div>
+                     </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 5. ÍCONES -->
+        <section id="icons" class="reveal-up border-t border-border pt-24 mb-24">
+             <div class="mb-12">
+                <h2 class="text-sm tracking-[0.3em] text-secondary mb-2 font-main">04. Iconografia</h2>
+                <h3 class="text-3xl text-primary font-main">Traços minimalistas de espessura constante. (Lucide Icons, Stroke 1.5px)</h3>
+            </div>
+            
+            <div class="flex flex-wrap gap-8 text-primary">
+                <div class="p-6 border border-border rounded-xl hover:bg-surface hover:text-accent2 transition-colors cursor-pointer"><i data-lucide="camera" stroke-width="1.5" class="w-8 h-8"></i></div>
+                <div class="p-6 border border-border rounded-xl hover:bg-surface hover:text-accent2 transition-colors cursor-pointer"><i data-lucide="film" stroke-width="1.5" class="w-8 h-8"></i></div>
+                <div class="p-6 border border-border rounded-xl hover:bg-surface hover:text-accent2 transition-colors cursor-pointer"><i data-lucide="play-circle" stroke-width="1.5" class="w-8 h-8"></i></div>
+                <div class="p-6 border border-border rounded-xl hover:bg-surface hover:text-accent2 transition-colors cursor-pointer"><i data-lucide="arrow-up-right" stroke-width="1.5" class="w-8 h-8"></i></div>
+                <div class="p-6 border border-border rounded-xl hover:bg-surface hover:text-accent2 transition-colors cursor-pointer"><i data-lucide="instagram" stroke-width="1.5" class="w-8 h-8"></i></div>
+                <div class="p-6 border border-border rounded-xl hover:bg-surface hover:text-accent2 transition-colors cursor-pointer"><i data-lucide="mail" stroke-width="1.5" class="w-8 h-8"></i></div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Modal Element -->
+    <div id="demo-modal" class="modal-overlay">
+        <div class="modal-content relative">
+            <button onclick="gsap.to('#demo-modal', {opacity:0, duration:0.3, onComplete:()=>document.getElementById('demo-modal').style.display='none'});" class="absolute top-4 right-4 text-secondary hover:text-primary transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h4 class="font-main text-xl uppercase tracking-tighter mb-4">Modal Cinematico</h4>
+            <p class="font-secondary text-secondary mb-6">Repare na transição de entrada suave, fundo com blur e sombra densa para criar profundidade no layout branco.</p>
+            <div class="aspect-video bg-surface rounded flex items-center justify-center border border-border">
+                <i data-lucide="play" class="w-10 h-10 text-border"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Initialize Icons & GSAP -->
+    <script>
+        lucide.createIcons();
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Stagger Animation
+        const tlHero = gsap.timeline();
+        
+        // Setup initial states
+        gsap.set(".hero-char", { y: 150, opacity: 0 });
+        gsap.set("#hero-tagline, .hero-desc", { y: 20, opacity: 0 });
+        gsap.set("#hero-symbol", { scale: 0.8, opacity: 0 });
+
+        // First animation stagger the text
+        tlHero.to(".hero-char", {
+            y: 0,
+            opacity: 1,
+            duration: 1.2,
+            stagger: 0.1,
+            ease: "expo.out",
+            delay: 0.2
+        })
+        .to("#hero-tagline", { y: 0, opacity: 1, duration: 1, ease: "power3.out" }, "-=1")
+        .to(".hero-desc", { y: 0, opacity: 1, duration: 1, stagger: 0.2, ease: "power3.out" }, "-=0.8")
+        .to("#hero-symbol", { scale: 1, opacity: 0.2, duration: 2, ease: "power2.out" }, "-=1.5");
+
+        // Scroll reveals for sections
+        gsap.utils.toArray('.reveal-up').forEach(section => {
+            gsap.to(section, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 85%", // Trigger when top of section is at 85% of viewport
+                    toggleActions: "play none none reverse"
+                },
+                y: 0,
+                opacity: 1,
+                duration: 1,
+                ease: "power3.out"
+            });
+        });
+        
+        // Simulating 3D Parallax Ribbon movement slightly on scroll
+        gsap.to("#hero-symbol", {
+            scrollTrigger: {
+                trigger: "body",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1
+            },
+            y: 300,
+            rotation: 45,
+            ease: "none"
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guilherme - Filmmaker</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        syncopate: ['Syncopate', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        black: '#0a0a0a',
+                        white: '#ffffff',
+                        gray: {
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Lock scroll as it's just the hero */
+            margin: 0;
+            padding: 0;
+        }
+
+        .hero-section {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        /* Imagem de Fundo (Whisk...) */
+        .bg-foto {
+            position: absolute;
+            inset: 0;
+            background-image: url('Whisk_bc19c38a1b9a2349b7e40276fa574f1fdr.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 0;
+            opacity: 0.6; /* Escurecer para o texto sobressair e manter o tom preto */
+            mix-blend-mode: luminosity; /* Ajuda a integrar a foto no tom escuro */
+        }
+
+        /* Overlay Escuro / Gradiente para fundir as bordas da foto ao preto e dar estilo cinematográfico */
+        .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent 20%, #050505 80%);
+            z-index: 1;
+        }
+
+        /* Container do Conteúdo */
+        .content-layer {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 4rem;
+        }
+
+        /* Título Principal Massivo estilo RYDGE STUDIO */
+        .title-container {
+            position: absolute;
+            top: 15%; /* Posicionado na parte superior/central como na referência */
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            pointer-events: none; /* Para não bloquear cliques na imagem/fundo se houver */
+        }
+
+        h1 {
+            font-family: 'Syncopate', sans-serif;
+            font-size: clamp(4rem, 16vw, 15rem);
+            font-weight: 700;
+            line-height: 0.8;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+            text-align: center;
+            margin: 0;
+            
+            /* Efeito idêntico ao "RYDGE STUDIO" - Gradiente Metálico/Prata */
+            background: linear-gradient(to bottom, #ffffff 30%, #555555 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            
+            white-space: nowrap;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(100px);
+        }
+
+        /* Linha de Serviços (Meio da tela) */
+        .services-row {
+            position: absolute;
+            top: 60%;
+            left: 0;
+            width: 100%;
+            padding: 0 4rem;
+            display: flex;
+            justify-content: space-between;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            color: #d1d5db; /* gray-300 */
+        }
+        
+        .service-item {
+            opacity: 0;
+        }
+
+        /* Descrição (Rodapé) */
+        .description-container {
+            position: absolute;
+            bottom: 3rem;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .description-text {
+            max-width: 500px;
+            text-align: center;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #9ca3af; /* gray-400 */
+            opacity: 0;
+        }
+
+        .description-text strong {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        /* Responsividade para a linha de serviços */
+        @media (max-width: 768px) {
+            .services-row {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1.5rem;
+                top: 55%;
+                padding: 0 2rem;
+            }
+            .content-layer {
+                padding: 1.5rem;
+            }
+            .description-text {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero-section">
+        <!-- Fundo (Sua foto.jpeg) e Overlays -->
+        <div class="bg-foto"></div>
+        <div class="bg-overlay"></div>
+
+        <!-- Camada de Conteúdo -->
+        <div class="content-layer">
+
+            <!-- Logo Avanta -->
+            <div style="position: absolute; top: 8%; left: 50%; transform: translateX(-50%); z-index: 20; width: clamp(100px, 15vw, 200px); pointer-events: none;">
+                <img id="hero-logo" src="avanta sem fundo.png" alt="Logo Avanta" style="width: 100%; height: auto; opacity: 0; filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5));">
+            </div>
+            
+            <!-- Título Principal -->
+            <div class="title-container">
+                <h1 id="hero-title">
+                    <span class="char">G</span><span class="char">U</span><span class="char">I</span><span class="char">L</span><span class="char">H</span><span class="char">E</span><span class="char">R</span><span class="char">M</span><span class="char">E</span>
+                </h1>
+            </div>
+
+            <!-- Linha de Serviços -->
+            <div class="services-row" id="services">
+                <span class="service-item">Direction</span>
+                <span class="service-item">Cinematography</span>
+                <span class="service-item">Editing</span>
+                <span class="service-item">Color Grading</span>
+                <span class="service-item">Production</span>
+            </div>
+
+            <!-- Descrição (Rodapé) -->
+            <div class="description-container">
+                <p class="description-text" id="desc">
+                    Guilherme is a full-service visual storyteller crafting beautiful cinematic experiences. We are an award-winning design and art collective specializing in <strong>branding and visual engineering.</strong>
+                </p>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Animações GSAP -->
+    <script>
+        const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+        // Animar a foto surgindo lentamente do preto
+        gsap.fromTo(".bg-foto", 
+            { opacity: 0, scale: 1.05 }, 
+            { opacity: 0.6, scale: 1, duration: 3, ease: "power2.out" }
+        );
+
+        // Animar Título Stagger
+        tl.to(".char", {
+            y: 0,
+            opacity: 1,
+            duration: 1.5,
+            stagger: 0.05,
+            ease: "expo.out"
+        }, "+=0.3")
+
+        // Animar Logo Avanta
+        .fromTo("#hero-logo",
+            { y: -30, opacity: 0, scale: 0.9 },
+            { y: 0, opacity: 1, scale: 1, duration: 1.5, ease: "power3.out" },
+            "-=1.2"
+        )
+        
+        // Animar Menu de Serviços (Fade in + slight Y move)
+        .fromTo(".service-item", 
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: "power3.out" },
+            "-=1"
+        )
+        
+        // Animar Descrição (Fade In Slow)
+        .fromTo("#desc",
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1.5, ease: "power2.out" },
+            "-=0.5"
+        );
+        
+        // Parallax sutil da foto do fundo acompanhando o mouse (opcional mas dá aspecto dinâmico premium)
+        document.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 50;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 50;
+            gsap.to(".bg-foto", {
+                x: xAxis,
+                y: yAxis,
+                duration: 1,
+                ease: "power1.out"
+            });
+        });
+    </script>
+</body>
+</html>
