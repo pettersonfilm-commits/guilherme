@@ -320,6 +320,9 @@
 
     <!-- CAIXA-FORTE BRANCA DO SITE -->
     <!-- Este div envolve a Dobra 2 e a Dobra 3. Ele trava a largura para evitar scroll horizontal reverso da seta gigante! -->
+    <main class="relative z-10 w-full" style="padding-top: 100vh;">
+
+        <!-- CAIXA-FORTE BRANCA DO SITE (Transição Deslizante) -->
     <div id="white-box-transition" class="w-full relative bg-white z-10 shadow-[0_-30px_60px_rgba(0,0,0,0.6)]">
         
         <!-- CONTAINER HERMÉTICO DO GRID (Z-0, Fundo) -->
@@ -494,6 +497,7 @@
     </section>
     
     </div> <!-- Fim da Caixa-Forte Branca Unificada das Duas Dobras -->
+    </main>
 
     <!-- Swiper JS CDN Injection -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
@@ -531,12 +535,12 @@
           .to('.p-reveal', { opacity: 1, y: 0, duration: 1, stagger: 0.2 }, "-=0.8")
           .to('.btn-reveal', { opacity: 1, y: 0, duration: 1 }, "-=0.6");
 
-        // Animação para a segunda dobra quando aparecer na tela
+        // Animação para a segunda dobra quando aparecer na tela (Menos demora no mobile)
         gsap.utils.toArray('.p-reveal-light').forEach((el) => {
             gsap.to(el, {
                 scrollTrigger: {
                     trigger: el,
-                    start: "top 85%",
+                    start: "top 95%", // Antes 85%, agora dispara logo que o pico toca na tela
                 },
                 opacity: 1,
                 y: 0,
@@ -617,27 +621,25 @@
         });
 
         // PARTE 2: A Física do Scroll (Sem Distorção Sintética - Preservando a renderização nativa da arte)
-        // Usamos inércia potente e propriedades relativas (xPercent) para evitar falhas em telas estreitas de Mobile
+        // Usamos inércia potente ancoradas puramente em Viewport Widths (vw) à prova de trapaça mobile
         gsap.fromTo(".scroll-arrow-img", 
             { 
-                x: "0vw",
-                xPercent: -110, // 110% do próprio tamanho recuado à esquerda (TOTALMENTE fora de visão, independente se é tela longa ou fina)
-                y: "5vh", // Posicionamento responsivo acoplado agora ao `#projetos`
-                rotation: -5, 
-                scale: 0.95 
+                x: "-220vw", // Nasce à extrema esquerda esmagando bem o frame invisível
+                y: "10vh", // Entra pela base do quadro
+                rotation: -5, // Inclinação 2D sutil sem amassar
+                scale: 0.95 // Sem saltos de proporção radicais
             },
             {
-                x: "100vw", // Todo elemento cruza a tela até encostar na borda direita
-                xPercent: 10, // Some perfeitamente no limite escondendo toda a cauda
-                y: "-15vh", // Movimento de voo ascendente rumo a dobra das fotos
-                rotation: 4, // Levanta o bico na saída
+                x: "120vw", // Sai completamente pela direita sem engasgar
+                y: "-10vh", // Sobe uma parábola leve (eixo Y)
+                rotation: 5, // Levanta o bico na saída
                 scale: 1.05, // Finaliza num zoom gentil
-                force3D: true, // Força chip gráfico
+                force3D: true, // Força chip gráfico acelerar o mobile
                 ease: "power2.inOut", // Curva orgânica macia da velocidade
                 scrollTrigger: {
                     trigger: "#projetos",
-                    start: "top 110%", // Dispara no momento exato de transição de dobras
-                    end: "top 0%", // Finaliza quando a terceira dobra beija o topo
+                    start: "top 130%", 
+                    end: "top -10%", // A janela vertical que dá tempo extra de travessia
                     scrub: 2.5 // INÉRCIA MATADORA
                 }
             }
@@ -650,7 +652,7 @@
         const projTl = gsap.timeline({
             scrollTrigger: {
                 trigger: "#projetos",
-                start: "top 75%", // Dispara quando a seção atinge 75% da altura da tela na rolagem
+                start: "top 90%", // Mudei de 75% para 90% matando o delay gigante em Mobile
             }
         });
 
