@@ -72,10 +72,11 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        body {
+        html, body {
             background-color: #050505;
             color: #FFFFFF;
             overflow-x: hidden;
+            width: 100%;
             font-family: 'Playfair Display', serif;
             margin: 0;
             padding: 0;
@@ -208,8 +209,12 @@
 </head>
 <body class="antialiased text-white">
 
-    <section id="hero-section" class="relative w-full min-h-screen flex flex-col justify-center items-center overflow-hidden bg-black z-0">
-        
+    <!-- MASTER WRAPPER (Impede calibração horizontal indesejada de dispositivos Apple baseada na fita contínua 200vw) -->
+    <div class="relative w-full overflow-x-hidden overflow-y-clip">
+
+    <section id="hero-section" class="relative w-full min-h-screen overflow-hidden bg-black z-0">
+        <div class="hero-inner relative w-full min-h-screen flex flex-col justify-center items-center">
+            
         <!-- Fundo Tecnológico e Foto -->
         <div class="absolute inset-0 z-0">
             <!-- Foto aparecendo com clareza -->
@@ -316,6 +321,7 @@
             </a>
         </div>
         
+        </div> <!-- Fim de .hero-inner para blindar o Pin do GSAP -->
     </section>
 
     <!-- CAIXA-FORTE BRANCA DO SITE -->
@@ -499,6 +505,8 @@
     </div> <!-- Fim da Caixa-Forte Branca Unificada das Duas Dobras -->
     </main>
 
+    </div> <!-- Fim do DOM MASTER WRAPPER -->
+
     <!-- Swiper JS CDN Injection -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 
@@ -518,22 +526,23 @@
             heroTitle.appendChild(document.createTextNode(" "));
         });
 
-        // GSAP Animations
-        const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+        // GSAP Animations - Aceleradas para retenção instantânea no Mobile
+        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-        tl.to('.nav-reveal', { opacity: 1, y: 0, duration: 1, stagger: 0.1, delay: 0.2 })
-          .to('.badge-reveal', { opacity: 1, duration: 0.8 }, "-=0.5")
+        // Removido o delay longo. O texto e os botões chovem rasgando a tela quase simultaneamente.
+        tl.to('.nav-reveal', { opacity: 1, y: 0, duration: 0.6, stagger: 0.05 })
+          .to('.badge-reveal', { opacity: 1, duration: 0.4 }, "-=0.4")
           .to(".char", {
               y: 0,
               rotationX: 0,
               opacity: 1,
-              duration: 1.2,
-              stagger: 0.05,
+              duration: 0.6,
+              stagger: 0.02, // Pipoca as palavras muito rápido
               ease: "expo.out"
-          }, "-=0.5")
-          .to('.h2-reveal', { opacity: 1, x: 0, duration: 1 }, "-=1")
-          .to('.p-reveal', { opacity: 1, y: 0, duration: 1, stagger: 0.2 }, "-=0.8")
-          .to('.btn-reveal', { opacity: 1, y: 0, duration: 1 }, "-=0.6");
+          }, "-=0.4")
+          .to('.h2-reveal', { opacity: 1, x: 0, duration: 0.6 }, "-=0.5")  // Sobreposto intensamente
+          .to('.p-reveal', { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 }, "-=0.5")
+          .to('.btn-reveal', { opacity: 1, y: 0, duration: 0.6 }, "-=0.5");
 
         // Animação para a segunda dobra quando aparecer na tela (Menos demora no mobile)
         gsap.utils.toArray('.p-reveal-light').forEach((el) => {
@@ -544,8 +553,8 @@
                 },
                 opacity: 1,
                 y: 0,
-                duration: 1,
-                ease: "power4.out"
+                duration: 0.6, // Cortado pela metade pra 'pular' instantâneo
+                ease: "power3.out"
             });
         });
 
@@ -559,15 +568,16 @@
             pinSpacing: false // Mágica: Permite que a seção de baixo passe por cima!
         });
 
-        // 2. Anima a Hero Section apagando e criando um Efeito Parallax de descida enquanto a tela branca sobe, sem compressão
-        gsap.to("#hero-section", {
+        // 2. Anima a Hero Section apagando e criando um Efeito Parallax de descida enquanto a tela branca sobe, sem compressão.
+        // Aplicamos na .hero-inner para NÃO DAR CONFLITO com o "pin: true" da section pai (que causava o bug do desktop de tremer).
+        gsap.to(".hero-inner", {
             y: "25vh", // Movimento cinemático macio "para o fundo" enquanto a página rola
             opacity: 0,
             scrollTrigger: {
                 trigger: "#white-box-transition", // Ativamos pelo envelope protetor para mais precisão
                 start: "top bottom", // Começa no exato momento que a aba branca entra minimamente
                 end: "top 10%",      // Encerra a transição diluindo até quase o topo
-                scrub: 1.2,          // Vincula a animação milimetricamente com feeling suave
+                scrub: true,         // Trava a animação ao scroll sem delay solto, ficando macio no mouse
             }
         });
 
@@ -656,19 +666,19 @@
             }
         });
 
-        // Orquestração: Linha cresce > texto surge > H2 sobe > frase surge > celulares sobem em cascata (stagger)
-        projTl.to(".proj-line", { width: 48, duration: 0.8, ease: "power3.inOut" }) // w-12 tailwind equivale a 48px
-              .to(".proj-badge", { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" }, "-=0.5")
-              .to(".proj-title", { opacity: 1, y: 0, duration: 1, ease: "power4.out" }, "-=0.4")
-              .to(".proj-desc", { opacity: 1, y: 0, duration: 1, ease: "power4.out" }, "-=0.8")
+        // Orquestração Acelerada: Linha cresce rápido > cascata de componentes muito próximos
+        projTl.to(".proj-line", { width: 48, duration: 0.5, ease: "power3.inOut" }) 
+              .to(".proj-badge", { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, "-=0.3")
+              .to(".proj-title", { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "-=0.3")
+              .to(".proj-desc", { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "-=0.5")
               .to(".swiper-slide", { 
                   opacity: 1, 
                   y: 0, 
                   scale: 1, 
-                  duration: 0.9, 
-                  ease: "back.out(1.2)", // Dá aquele "Bounce" minúsculo no final do movimento para sensação tátil
-                  stagger: 0.15 // Atrasa a entrada celular a celular de forma cadenciada
-              }, "-=0.6");
+                  duration: 0.6, // Células de vídeo despencam fluidas muito rápido
+                  ease: "back.out(1.2)", 
+                  stagger: 0.08 // Stagger agressivo não trava o dedão de quem tentar rolar logo
+              }, "-=0.5");
 
     </script>
 </body>
